@@ -29,6 +29,8 @@ export default class EditBox extends React.Component {
   }
   
   onOverlayClick() {
+    const { loading } = this.props;
+    if (loading) return;
     this.onCancel();
   }
   
@@ -54,11 +56,15 @@ export default class EditBox extends React.Component {
   }
   
   render() {
-    const { loading } = this.props;
+    const { loading, fullPage } = this.props;
     return (
       <div className={!this.state.visible ? gs.hidden : null}>
         <div className={s.overlay} onClick={() => this.onOverlayClick()} />
-        <div className={cx(gs.adminContainer, s.container)}>
+        <div className={cx(
+          gs.adminContainer,
+          s.container,
+          fullPage ? s.fullPage : null
+        )}>
           <div className={s.titleContainer}>{this.state.title}</div>
           <div className={s.contentContainer}>{this.props.children}</div>
           {loading ? (
@@ -66,21 +72,23 @@ export default class EditBox extends React.Component {
               <i className="fa fa-cog fa-spin fa-5x fa-fw" />
             </div>
           ) : null}
-          <div className={s.buttonContainer}>
-            <button
-              className={cx(gs.shadowButton, gs.danger, s.button)}
-              onClick={() => this.onCancelClick()}
-            >
-              Cancel
-            </button>
-            &nbsp;&nbsp;
-            <button
-              className={cx(gs.shadowButton, s.button)}
-              onClick={() => this.onOkClick()}
-            >
-              Save
-            </button>
-          </div>
+          { loading ? null : (
+            <div className={s.buttonContainer}>
+              <button
+                className={cx(gs.shadowButton, gs.danger, s.button)}
+                onClick={() => this.onCancelClick()}
+              >
+                Cancel
+              </button>
+              &nbsp;&nbsp;
+              <button
+                className={cx(gs.shadowButton, s.button)}
+                onClick={() => this.onOkClick()}
+              >
+                Save
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

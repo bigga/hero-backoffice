@@ -25,6 +25,15 @@
   color: #333;
 }
 
+.fullPage {
+  width: inherit;
+  left: 50px;
+  right: 50px;
+  top: 25px;
+  bottom: 25px;
+  margin-left: 0;
+}
+
 @media only screen and (max-width: 768px) {
   .container {
     width: auto;

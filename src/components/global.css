@@ -172,6 +172,18 @@
   }
 }
 
+.frontIcon {
+  margin-right: 10px;
+}
+
+.okIcon {
+  color: #3d8c72;
+}
+
+.errorIcon {
+  color: #cd5c5c;
+}
+
 .error {
   color: #cd5c5c;
 }

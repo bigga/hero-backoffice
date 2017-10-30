@@ -6,14 +6,14 @@ export default class ApiRoleController {
   
   static masterRoles = [];
   
-  get(req, res) {
+  list(req, res) {
     const { masterRoles } = ApiRoleController;
     if (masterRoles && masterRoles.length) {
-      res.send(masterRoles);
+      res && res.send(masterRoles);
       return Promise.resolve(masterRoles);
     }
     
-    Promise.resolve()
+    return Promise.resolve()
       .then(() => {
         return fetch(Constants.REMOTE_API_ROLE, null, {
           method: 'GET',
@@ -24,7 +24,7 @@ export default class ApiRoleController {
       })
       .then(roles => {
         ApiRoleController.masterRoles = roles;
-        res.send(roles);
+        res && res.send(roles);
         return Promise.resolve(roles);
       })
       .catch(createFallback(res));

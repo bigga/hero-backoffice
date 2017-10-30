@@ -3,6 +3,7 @@ import cx from 'classnames';
 
 import Constants from '../../config/Constants';
 import apiFetch from '../../utils/ApiFetch';
+import multipartFetch from '../../utils/MultipartFetch';
 import Validator from '../../utils/validator';
 
 import Layout from '../../components/layout/Layout';
@@ -17,7 +18,9 @@ export default class UserPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      importing: false,
       items: [],
+      importedItems: [],
       roles: [],
       validation: {...this.defaultValidation},
       currentItem: {...this.emptyValue},
@@ -26,7 +29,9 @@ export default class UserPage extends React.Component {
   
   componentWillMount() {
     apiFetch('GET', Constants.API_ROLE)
-      .then(roles => this.setState({ roles }));
+      .then(roles => {
+        this.setState({ roles })
+      });
     apiFetch('GET', Constants.API_USER)
       .then(items => this.setState({ items }));
   }
@@ -38,6 +43,41 @@ export default class UserPage extends React.Component {
     });
     this.adminEdit.setTitle(`Add ${this.itemName}`);
     this.adminEdit.setVisible(true);
+  }
+  
+  onImport() {
+    const { importedItems } = this.state;
+    this.setState({ importing: true });
+    Promise.all((importedItems || [])
+      .filter(item => !item.invalid || !item.invalid.length)
+      .map(item => {
+        return apiFetch('POST', Constants.API_USER, item);
+      })
+    )
+      .then(() => window.location.reload())
+      .catch(error => console.log(error));
+  }
+  
+  onExcelImport() {
+    this.uploadInput.click();
+  }
+  
+  onUploadChange(event) {
+    const excel = event.target.files[0];
+    const formData = new FormData();
+    formData.append('excel', excel);
+    
+    this.setState({ importedItems: [] });
+    multipartFetch(
+      'POST',
+      `${Constants.API_USER}/excel`,
+      formData
+    ).then(importedItems => {
+      this.uploadInput.value = null;
+      this.setState({ importedItems });
+      this.adminImport.setTitle(`Import from Excel`);
+      this.adminImport.setVisible(true);
+    });
   }
   
   onItemDelete(item) {
@@ -117,6 +157,58 @@ export default class UserPage extends React.Component {
     );
   }
   
+  renderImport() {
+    const { importedItems } = this.state;
+    return (
+      <EditBox
+        onRef={ref => (this.adminImport = ref)}
+        onOkClick={() => this.onImport()}
+        loading={this.state.importing}
+        fullPage
+      >
+        <table className={gs.dataTable}>
+          <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Role</th>
+          </tr>
+          </thead>
+          <tbody>
+          {(importedItems || []).map((item, index) => (
+            <tr key={item.id}>
+              <td className={gs.idCell}>
+                <i className={
+                  item.invalid.indexOf('email') !== -1
+                    ? cx('fa fa-times-circle', gs.frontIcon, gs.errorIcon)
+                    : cx('fa fa-check-circle', gs.frontIcon, gs.okIcon)
+                } />
+                {item.email || '—'}
+              </td>
+              <td className={gs.nameCell}>
+                <i className={
+                  item.invalid.indexOf('name') !== -1
+                    ? cx('fa fa-times-circle', gs.frontIcon, gs.errorIcon)
+                    : cx('fa fa-check-circle', gs.frontIcon, gs.okIcon)
+                } />
+                {item.name || '—'}
+              </td>
+              <td className={gs.idCell}>
+                <i className={
+                  item.invalid.indexOf('role') !== -1
+                    ? cx('fa fa-times-circle', gs.frontIcon, gs.errorIcon)
+                    : cx('fa fa-check-circle', gs.frontIcon, gs.okIcon)
+                } />
+                {item.role || '—'}
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </EditBox>
+    );
+  }
+  
   renderEdit() {
     const { validation } = this.state;
     return (
@@ -178,7 +270,7 @@ export default class UserPage extends React.Component {
   }
   
   render() {
-    const { roles, items } = this.state;
+    const { items } = this.state;
     return (
       <Layout loggedIn={true}>
         <div className={gs.adminRoot}>
@@ -188,7 +280,18 @@ export default class UserPage extends React.Component {
               <tr>
                 <th>Email</th>
                 <th>Name</th>
-                <th colSpan={2}>
+                <th>
+                  <input type="file" style={{display: 'none'}}
+                         ref={ref => this.uploadInput = ref}
+                         onChange={event => this.onUploadChange(event)} />
+                  <button
+                    className={cx(gs.shadowButton, gs.pushRight)}
+                    onClick={() => this.onExcelImport()}
+                  >
+                    Import
+                  </button>
+                </th>
+                <th>
                   <button
                     className={cx(gs.shadowButton, gs.pushRight)}
                     onClick={() => this.onItemAdd()}
@@ -203,14 +306,14 @@ export default class UserPage extends React.Component {
                 <tr key={item.id}>
                   <td className={gs.idCell}>{item.email}</td>
                   <td className={gs.nameCell}>{item.name}</td>
-                  {/*<td className={gs.buttonCell}>*/}
-                    {/*<button*/}
-                      {/*className={gs.shadowButton}*/}
-                      {/*onClick={() => this.onItemEdit(item)}*/}
-                    {/*>*/}
-                      {/*Edit*/}
-                    {/*</button>*/}
-                  {/*</td>*/}
+                  <td className={gs.buttonCell}>
+                    <button
+                      className={gs.shadowButton}
+                      onClick={() => this.onItemEdit(item)}
+                    >
+                      Edit
+                    </button>
+                  </td>
                   <td className={gs.buttonCell}>
                     <button
                       className={cx(gs.shadowButton, gs.danger)}
@@ -226,6 +329,7 @@ export default class UserPage extends React.Component {
           </div>
           {this.renderConfirm()}
           {this.renderEdit()}
+          {this.renderImport()}
         </div>
       </Layout>
     );
