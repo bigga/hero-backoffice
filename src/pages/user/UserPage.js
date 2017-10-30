@@ -45,6 +45,10 @@ export default class UserPage extends React.Component {
     this.adminEdit.setVisible(true);
   }
   
+  onItemEdit() {
+    
+  }
+  
   onImport() {
     const { importedItems } = this.state;
     this.setState({ importing: true });
