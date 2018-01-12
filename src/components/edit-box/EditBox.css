@@ -27,8 +27,9 @@
 
 .fullPage {
   width: inherit;
+  max-width: inherit;
   left: 50px;
-  right: 50px;
+  right: 50px !important;
   top: 25px;
   bottom: 25px;
   margin-left: 0;

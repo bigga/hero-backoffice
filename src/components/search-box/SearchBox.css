@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  width: 250px;
+  height: 30px;
+  padding: 10px 15px;
+  margin-right: 15px;
+  margin-bottom: 0;
+  float: right;
+  flex-direction: row;
+  justify-items: flex-start;
+  align-items: stretch;
+}
+
+.container .icon {
+  width: 30px;
+  line-height: 30px;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.container .item {
+  position:relative;
+  flex: 1;
+  cursor: pointer;
+}
+
+.container .item input[type="text"] {
+  width: 100%;
+  border: 0;
+  outline: none;
+  line-height: 30px;
+  color: #666;
+  font-size: 20px;
+  font-family: 'Calibri', sans-serif;
+}

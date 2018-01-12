@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  width: 100px;
+  height: 30px;
+  padding: 12px 15px 10px;
+  margin-right: 0;
+  margin-bottom: 0;
+  float: right;
+  flex-direction: row;
+  justify-items: flex-start;
+  align-items: stretch;
+  font-size: 20px;
+}
+
+.container .item {
+  flex: 1;
+  line-height: 30px;
+  color: #666;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Calibri', sans-serif;
+}
+
+.container .item.symbol {
+  font-size: 16px;
+}

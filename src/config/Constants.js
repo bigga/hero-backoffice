@@ -9,5 +9,6 @@ export default {
   API_LOGIN: `${API_URL}/login`,
   API_LOGOUT: `${API_URL}/logout`,
   API_USER: `${API_URL}/user`,
+  API_KNOWLEDGE: `${API_URL}/knowledge`,
   API_ROLE: `${API_URL}/role`,
 };

@@ -7,16 +7,20 @@ import multipartFetch from '../../utils/MultipartFetch';
 import Validator from '../../utils/validator';
 
 import Layout from '../../components/layout/Layout';
+import Pagination from '../../components/pagination/Pagination';
 import EditBox from '../../components/edit-box/EditBox';
 import ConfirmBox from '../../components/confirm-box/ConfirmBox';
 
 import gs from '../../components/global.css';
 import TextUtils from "../../utils/TextUtils";
+import SearchBox from "../../components/search-box/SearchBox";
 
 export default class UserPage extends React.Component {
   
   constructor(props) {
     super(props);
+    this.offset = 0;
+    this.limit = 10;
     this.state = {
       importing: false,
       items: [],
@@ -24,6 +28,7 @@ export default class UserPage extends React.Component {
       roles: [],
       validation: {...this.defaultValidation},
       currentItem: {...this.emptyValue},
+      canMoveNext: false,
     };
   }
   
@@ -32,8 +37,23 @@ export default class UserPage extends React.Component {
       .then(roles => {
         this.setState({ roles })
       });
-    apiFetch('GET', Constants.API_USER)
-      .then(items => this.setState({ items }));
+    apiFetch('GET', `${Constants.API_USER}?offset=0&limit=10`)
+      .then(json => this.setState({
+        items: json.data,
+        canMoveNext: !!json.next
+      }));
+  }
+  
+  onPageChange(page) {
+    this.offset = (page - 1) * this.limit;
+    return this.query();
+  }
+  
+  onSearch(text) {
+    this.offset = 0;
+    this.pagination.reset();
+    this.search = text;
+    return this.query();
   }
   
   onItemAdd() {
@@ -45,8 +65,24 @@ export default class UserPage extends React.Component {
     this.adminEdit.setVisible(true);
   }
   
-  onItemEdit() {
-    
+  onItemEdit(item) {
+    Promise.resolve()
+      .then(() => {
+        return apiFetch('GET', `${Constants.API_USER}/${item.id}`)
+          .then(json => {
+            console.log('>>current_item<<', json);
+            const currentItem = json.data || {};
+            if (currentItem) {
+              currentItem.roleId = currentItem.role_id;
+            }
+            this.setState({ currentItem });
+            return Promise.resolve(currentItem);
+          });
+      })
+      .then(currentItem => {
+        this.adminEdit.setTitle(`Edit ${this.itemName}`);
+        this.adminEdit.setVisible(true);
+      });
   }
   
   onImport() {
@@ -119,20 +155,23 @@ export default class UserPage extends React.Component {
       return;
     }
     
-    // if (currentItem.id) {
-    //   axios
-    //     .put(`${this.itemApi}${currentItem.id}`, currentItem)
-    //     .then(response => {
-    //       const json = response.data;
-    //       const item = json.data;
-    //       console.log(item);
-    //       this.adminEdit.setVisible(false);
-    //       window.location.reload();
-    //     })
-    //     .catch(error => {
-    //       console.log(error);
-    //     });
-    // } else {
+    if (currentItem.id) {
+      const {currentItem} = this.state;
+      console.log('>>current_item<<', currentItem);
+      
+      apiFetch('PUT', `${Constants.API_USER}/${currentItem.id}`, currentItem)
+        .then(() => {
+          window.location.reload();
+        })
+        .catch(error => {
+          const { message } = error;
+          if (message.indexOf('@JSON_') === 0) {
+            const data = JSON.parse(message.replace('@JSON_', ''));
+            const { message: boxError } = data;
+            this.setState({ boxError });
+          }
+        });
+    } else {
       apiFetch('POST', Constants.API_USER, this.state.currentItem)
         .then(items => {
           window.location.reload();
@@ -145,7 +184,21 @@ export default class UserPage extends React.Component {
             this.setState({ boxError });
           }
         });
-    // }
+    }
+  }
+  
+  query() {
+    let { offset, limit, search } = this;
+    offset = offset || '';
+    limit = limit || '';
+    search = search || '';
+    return apiFetch('GET', `${Constants.API_USER}`
+      +`?offset=${offset}&limit=${limit}&q=${search}`)
+      .then(json => {
+        const items = json.data;
+        this.setState({ items, canMoveNext: !!json.next });
+        return Promise.resolve();
+      });
   }
   
   itemName = 'User';
@@ -274,16 +327,26 @@ export default class UserPage extends React.Component {
   }
   
   render() {
-    const { items } = this.state;
+    const { items, canMoveNext } = this.state;
     return (
-      <Layout loggedIn={true}>
+      <Layout loggedIn>
         <div className={gs.adminRoot}>
+          <div className={gs.filterPagination}>
+            <Pagination onRef={ref => this.pagination = ref}
+              onPageChange={page => this.onPageChange(page)}
+              canMoveNext={canMoveNext}
+            />
+            <SearchBox onSearch={text => this.onSearch(text)}/>
+          </div>
+          <div className={gs.clearFixed}/>
           <div className={gs.adminContainer}>
             <table className={gs.dataTable}>
               <thead>
               <tr>
                 <th>Email</th>
                 <th>Name</th>
+                <th>Role</th>
+                <th>Registered</th>
                 <th>
                   <input type="file" style={{display: 'none'}}
                          ref={ref => this.uploadInput = ref}
@@ -310,6 +373,12 @@ export default class UserPage extends React.Component {
                 <tr key={item.id}>
                   <td className={gs.idCell}>{item.email}</td>
                   <td className={gs.nameCell}>{item.name}</td>
+                  <td className={gs.idCell}>
+                    {TextUtils.capitalize(item.role.name)}
+                  </td>
+                  <td className={gs.idCell}>
+                    {item.registered ? 'Yes' : 'No'}
+                  </td>
                   <td className={gs.buttonCell}>
                     <button
                       className={gs.shadowButton}

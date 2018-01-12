@@ -36,7 +36,13 @@
   }
 }
 
+.filterPagination {
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
 .dataTable {
+  position: relative;
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
@@ -62,8 +68,11 @@
 }
 
 .dataTable td.idCell {
-  width: 350px;
   word-wrap: break-word;
+}
+
+.dataTable td.small {
+  max-width: 150px;
 }
 
 .dataTable td.buttonCell {
@@ -203,4 +212,20 @@
   font-weight: bold;
   margin-bottom: 5px;
   margin-top: -5px;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.textRight {
+  text-align: right;
+}
+
+.textLeft {
+  text-left: left;
+}
+
+.clearFixed {
+  clear: both;
 }

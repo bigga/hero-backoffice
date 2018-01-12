@@ -1,14 +1,25 @@
 import fetch from 'node-fetch';
 
 export default (url, reqBody, options) => {
-  const body = reqBody ? JSON.stringify(reqBody) : undefined;
+  let body;
+  if (reqBody && reqBody.append) {
+    body = reqBody;
+  } else {
+    body = reqBody ? JSON.stringify(reqBody) : undefined;
+  }
+
   let status = 0;
   let isError = false;
-  
+
+  let contentType;
+  if (!reqBody || !reqBody.append) {
+    contentType = {'Content-type': 'application/json'};
+  }
+
   return fetch(url, {
     ...options,
     headers: {
-      'Content-type': 'application/json',
+      ...contentType,
       ...options.headers,
     },
     body,

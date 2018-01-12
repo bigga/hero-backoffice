@@ -1,7 +1,9 @@
 #!/bin/sh
 
 npm run build
+rm -rf ../hero-backoffice-prod/server
 mkdir -p ../hero-backoffice-prod/server
+rm -rf ../hero-backoffice-prod/build
 cp -rf ./build ../hero-backoffice-prod/build
 cp -rf ./server/config ../hero-backoffice-prod/server/config
 cp -rf ./server/controllers ../hero-backoffice-prod/server/controllers
@@ -15,5 +17,5 @@ git pull
 git add build
 git add server
 git commit -a -m 'new version'
-git push origin master
+git push
 cd ../hero-backoffice

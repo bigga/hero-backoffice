@@ -62,11 +62,7 @@ export default class Header extends React.Component {
             </div>
           ) : null}
         </div>
-        {loggedIn ? (
-          this.renderMenu()
-        ) : (
-          <div className={cx(s.menu, s.admin)}>Administration Console</div>
-        )}
+        <div className={cx(s.menu, s.admin)}>Administration Console</div>
       </div>
     )
   }

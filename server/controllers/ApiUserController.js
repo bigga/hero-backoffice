@@ -7,9 +7,16 @@ import ApiRoleController from "./ApiRoleController";
 
 export default class ApiUserController {
   list(req, res) {
+    let { limit, offset, q } = req.query;
+    limit = limit || '';
+    offset = offset || '';
+    q = q || '';
+    const url = `${Constants.REMOTE_API_USER}`
+      + `?limit=${limit}&offset=${offset}&q=${q}`;
+    console.log(url);
     return Promise.resolve()
       .then(() => {
-        return fetch(Constants.REMOTE_API_USER, null, {
+        return fetch(url, null, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${req.session.api.token}`,
@@ -23,6 +30,27 @@ export default class ApiUserController {
       .catch(createFallback(res));
   }
   
+  getOne(req, res) {
+    const { id } = req.params;
+    const url = `${Constants.REMOTE_API_USER}/${id}`;
+    console.log('>>get_one<<', url);
+    
+    return Promise.resolve()
+      .then(() => {
+        return fetch(url, null, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${req.session.api.token}`,
+          }
+        })
+      })
+      .then(user => {
+        res.send(user);
+        return Promise.resolve(user);
+      })
+      .catch(createFallback(res));
+  }
+  
   store(req, res) {
     const { email, name, roleId } = req.body;
     return Promise.resolve()
@@ -31,6 +59,27 @@ export default class ApiUserController {
           email, name, roleId, password: ''
         }, {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${req.session.api.token}`,
+          }
+        });
+      })
+      .then(user => {
+        res.send(user);
+        return Promise.resolve(user);
+      })
+      .catch(createFallback(res));
+  }
+  
+  update(req, res) {
+    const { id } = req.params;
+    const { email, name, roleId } = req.body;
+    return Promise.resolve()
+      .then(() => {
+        return fetch(`${Constants.REMOTE_API_USER}/${id}`, {
+          email, name, roleId
+        }, {
+          method: 'PUT',
           headers: {
             'Authorization': `Bearer ${req.session.api.token}`,
           }
