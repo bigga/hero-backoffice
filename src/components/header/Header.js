@@ -24,6 +24,14 @@ export default class Header extends React.Component {
     apiFetch('POST', Constants.API_LOGOUT)
       .then(() => window.location.href = '/');
   }
+
+  onPressUser() {
+    window.location.href = '/user';
+  }
+
+  onPressKnowledge() {
+    window.location.href = '/knowledge';
+  }
   
   renderMenu() {
     return (
@@ -57,6 +65,9 @@ export default class Header extends React.Component {
             <div className={s.dropdown}>
               <button className={s.dropbtn}>☰</button>
               <div className={s.dropdownContent}>
+                <a onClick={() => this.onPressUser()}>User</a>
+                <a onClick={() => this.onPressKnowledge()}>Knowledge</a>
+                <hr/>
                 <a onClick={() => this.onSignOut()}>Sign Out</a>
               </div>
             </div>

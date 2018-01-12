@@ -113,7 +113,7 @@ export default class KnowledgePage extends React.Component {
     if (!Object.keys(validation).every(key => validation[key])) {
       return;
     }
-    
+
     const formData = new FormData();
     formData.append('nameTH', currentItem.nameTH);
     formData.append('nameEN', currentItem.nameEN);
