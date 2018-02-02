@@ -369,7 +369,7 @@ export default class UserPage extends React.Component {
               </tr>
               </thead>
               <tbody>
-              {items.map((item, index) => (
+              {(items || []).map((item, index) => (
                 <tr key={item.id}>
                   <td className={gs.idCell}>{item.email}</td>
                   <td className={gs.nameCell}>{item.name}</td>
