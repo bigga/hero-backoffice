@@ -29,8 +29,11 @@ export default (url, reqBody, options) => {
       isError = Math.floor(status / 100) !== 2;
       return Promise.resolve(response);
     })
-    .then(response => response.json())
-    .then(json => {
+    .then(response => response.text())
+    .then(text => {
+      console.log('>>response_text<<', text);
+
+      let json = JSON.parse(text);
       if (isError) {
         return Promise.reject(new Error(
           `@API_ERROR_${JSON.stringify({ ...json, status })}`
