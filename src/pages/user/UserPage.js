@@ -29,6 +29,7 @@ export default class UserPage extends React.Component {
       validation: {...this.defaultValidation},
       currentItem: {...this.emptyValue},
       canMoveNext: false,
+      isRequesting: {}
     };
   }
   
@@ -40,10 +41,11 @@ export default class UserPage extends React.Component {
     apiFetch('GET', `${Constants.API_USER}?offset=0&limit=10`)
       .then(json => this.setState({
         items: json.data,
-        canMoveNext: !!json.next
+        canMoveNext: !!json.next,
+        isRequesting: json.data.reduce((newObj, object) => ({ ...newObj, [object.id]: false }), {}),
       }));
   }
-  
+
   onPageChange(page) {
     this.offset = (page - 1) * this.limit;
     return this.query();
@@ -143,7 +145,59 @@ export default class UserPage extends React.Component {
     item[field] = event.target.value;
     this.setState({ currentItem: item });
   }
-  
+
+  onOptionSelected(event, item) {
+    const roleName = event.target.value;
+    const userId = event.target.name;
+    this.setState({
+      isRequesting: {
+        ...this.state.isRequesting,
+        [userId]: true,
+      }
+    }, () => {
+      const role = this.state.roles.filter(role => role.name === roleName).pop();
+      const user = { email: item.email, name: item.name, roleId: role.id };
+      const users = this.state.items;
+      apiFetch('PUT', `${Constants.API_USER}/${item.id}`, user)
+        .then(updatedUser => {
+          const index = users.findIndex(user => user.id === updatedUser.id);
+          if (index > -1) {
+            const newUsers = [...users];
+            newUsers.splice(index, 1, { ...updatedUser, role, registered: item.registered });
+            this.setState({
+              items: newUsers,
+              isRequesting: {
+                ...this.state.isRequesting,
+                [userId]: false,
+              }
+            });
+          }
+        })
+        .catch(error => {
+          const { message } = error;
+          if (message.indexOf('@JSON_') === 0) {
+            const data = JSON.parse(message.replace('@JSON_', ''));
+            const { message: boxError } = data;
+            this.setState({
+              boxError,
+              isRequesting: {
+                ...this.state.isRequesting,
+                [userId]: false,
+              }
+            });
+          }
+        });
+    })
+  }
+
+  onAllItemSelected(event) {
+    const value = event.target.checked;
+    const isRequesting= Object.keys(this.state.isRequesting).reduce((obj, key) => ({ ...obj, [key]: value }), {});
+    this.setState({
+      isRequesting
+    });
+  }
+
   onSave() {
     const { currentItem, validation } = this.state;
     validation.name = !!(currentItem.name || '').trim();
@@ -196,7 +250,8 @@ export default class UserPage extends React.Component {
       +`?offset=${offset}&limit=${limit}&q=${search}`)
       .then(json => {
         const items = json.data;
-        this.setState({ items, canMoveNext: !!json.next });
+        const isRequesting= items.reduce((newObj, object) => ({ ...newObj, [object.id]: false }), {});
+        this.setState({ items, canMoveNext: !!json.next, isRequesting});
         return Promise.resolve();
       });
   }
@@ -318,9 +373,12 @@ export default class UserPage extends React.Component {
           onChange={event => this.onValueChange(event, 'roleId')}
         >
           <option value="">Please select</option>
-          {this.state.roles.map(role => (
-            <option value={role.id}>{TextUtils.capitalize(role.name)}</option>
-          ))}
+          {this.state.roles
+            ? this.state.roles.map(role => (
+              <option value={role.id}>{TextUtils.capitalize(role.name)}</option>
+              ))
+            : null
+          }
         </select>
       </EditBox>
     );
@@ -345,7 +403,7 @@ export default class UserPage extends React.Component {
               <tr>
                 <th>Email</th>
                 <th>Name</th>
-                <th>Role</th>
+                <th colSpan="3">Role</th>
                 <th>Registered</th>
                 <th>
                   <input type="file" style={{display: 'none'}}
@@ -367,15 +425,34 @@ export default class UserPage extends React.Component {
                   </button>
                 </th>
               </tr>
+              <tr>
+                <td/>
+                <td/>
+                {['consultant', 'teacher', 'parent'].map(role =>
+                  (<td className={gs.radioHeadCell} key={role}>{TextUtils.capitalize(role)}</td>)
+                )}
+                <td/>
+                <td/>
+                <td/>
+              </tr>
               </thead>
               <tbody>
               {(items || []).map((item, index) => (
                 <tr key={item.id}>
+
                   <td className={gs.idCell}>{item.email}</td>
                   <td className={gs.nameCell}>{item.name}</td>
-                  <td className={gs.idCell}>
-                    {TextUtils.capitalize(item.role.name)}
-                  </td>
+                  {['consultant', 'teacher', 'parent'].map(roleName =>
+                    (<td className={gs.radioCell}>
+                      <input type="radio"
+                             name={item.id}
+                             value={roleName}
+                             disabled={item.role.name === 'admin' || this.state.isRequesting[item.id] || false}
+                             checked={item.role.name === roleName}
+                             onChange={event => this.onOptionSelected(event, item)}
+                      />
+                    </td>)
+                  )}
                   <td className={gs.idCell}>
                     {item.registered ? 'Yes' : 'No'}
                   </td>
