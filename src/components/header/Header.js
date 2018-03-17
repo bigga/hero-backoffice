@@ -9,16 +9,36 @@ import s from './Header.css';
 import imgLogo from '../../images/hero-logo.png';
 
 export default class Header extends React.Component {
-  
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      role: {},
+    };
+  }
+
   componentWillMount() {
     const { parent, pageName } = this.props;
     this.parent = parent;
     this.pageName = pageName;
+    this.fetchSession();
   }
   
   menuItems = {
     user: 'Users',
   };
+
+  fetchSession() {
+    return apiFetch('GET', `${Constants.API_SESSION}`)
+      .then(user => {
+        if (!user) {
+          return;
+        }
+        this.setState({
+          role: (user || {}).role
+        });
+      });
+  }
   
   onSignOut() {
     apiFetch('POST', Constants.API_LOGOUT)
@@ -35,6 +55,10 @@ export default class Header extends React.Component {
 
   onPressInvitation() {
     window.location.href = '/invitation';
+  }
+
+  onPressConsultation() {
+    window.location.href = '/chat';
   }
   
   renderMenu() {
@@ -59,6 +83,8 @@ export default class Header extends React.Component {
   
   render() {
     const { loggedIn } = this.props;
+    const { role } = this.state;
+
     return (
       <div className={s.root}>
         <div className={s.container}>
@@ -69,9 +95,22 @@ export default class Header extends React.Component {
             <div className={s.dropdown}>
               <button className={s.dropbtn}>☰</button>
               <div className={s.dropdownContent}>
-                <a onClick={() => this.onPressUser()}>User</a>
-                <a onClick={() => this.onPressKnowledge()}>Knowledge</a>
-                <a onClick={() => this.onPressInvitation()}>Invitation</a>
+                {
+                  role.name === 'admin' ? (
+                    <div>
+                      <a onClick={() => this.onPressUser()}>User</a>
+                      <a onClick={() => this.onPressKnowledge()}>Knowledge</a>
+                    </div>
+                  ) : null
+                }
+                {
+                  role.name === 'consultant' ? (
+                    <div>
+                      <a onClick={() => this.onPressConsultation()}>Consultation</a>
+                      <a onClick={() => this.onPressInvitation()}>Invitation</a>
+                    </div>
+                  ): null
+                }
                 <hr/>
                 <a onClick={() => this.onSignOut()}>Sign Out</a>
               </div>

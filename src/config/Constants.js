@@ -16,4 +16,9 @@ export default {
   API_MESSAGE,
   API_SEND_MESSAGE: `${API_MESSAGE}/send`,
   API_INVITATION: `${API_URL}/invitation`,
+  LOCALIZED_STATUS: {
+    Accept: 'Accepted',
+    Decline: 'Declined',
+    Pending: 'Pending'
+  }
 };

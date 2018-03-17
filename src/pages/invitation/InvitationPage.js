@@ -28,6 +28,24 @@ export default class InvitationPage extends React.Component {
       }));
   }
 
+  onAccept(invitation) {
+    const { key } = invitation;
+    apiFetch('POST', `${Constants.API_INVITATION}/${key}/accept`)
+      .then(json => {
+        console.log('>>accept<<', json);
+        this.fetchInvitations();
+      });
+  }
+
+  onDecline(invitation) {
+    const { key } = invitation;
+    apiFetch('POST', `${Constants.API_INVITATION}/${key}/decline`)
+      .then(json => {
+        console.log('>>decline<<', json);
+        this.fetchInvitations();
+      });
+  }
+
   componentWillMount() {
     this.fetchInvitations();
   }
@@ -35,6 +53,7 @@ export default class InvitationPage extends React.Component {
 
   render() {
     const {invitations} = this.state;
+    console.log('>>invitation<<', invitations);
     return (
       <Layout loggedIn>
         <div className={gs.adminRoot}>
@@ -66,7 +85,7 @@ export default class InvitationPage extends React.Component {
                         {new Date(invitation.created_at).toLocaleString()}
                       </td>
                       <td>
-                        {invitation.status}
+                        {Constants.LOCALIZED_STATUS[invitation.status]}
                       </td>
                       { invitation.status === 'Pending' ? (
                         <td>
@@ -87,6 +106,9 @@ export default class InvitationPage extends React.Component {
                             Decline
                           </button>
                         </td>
+                      ) : null}
+                      { invitation.status !== 'Pending' ? (
+                        <td colSpan={2} />
                       ) : null}
                     </tr>
                   );

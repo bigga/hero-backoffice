@@ -76,7 +76,9 @@ export default {
       // Session
       .get(Constants.LOCAL_API_SESSION, session.get)
       // Invitation
-      .get(Constants.LOCAL_API_INVITATION, invitation.get);
+      .get(Constants.LOCAL_API_INVITATION, invitation.get)
+      .post(`${Constants.LOCAL_API_INVITATION}/:id/accept`, invitation.accept)
+      .post(`${Constants.LOCAL_API_INVITATION}/:id/decline`, invitation.decline);
   }
   
 };

@@ -24,4 +24,42 @@ export default class ApiInvitationController {
       .catch(createFallback(res));
   }
 
+  accept(req, res) {
+    const { id:invitationKey } = req.params;
+    const url = `${Constants.REMOTE_API_INVITATION}/${invitationKey}/accept`;
+    console.log('>>token<<', url, req.session.api.token);
+    return Promise.resolve()
+      .then(() => {
+        return fetch(url, null, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${req.session.api.token}`,
+          }
+        });
+      })
+      .then(invitation => {
+        res.send(invitation);
+      })
+      .catch(createFallback(res));
+  }
+
+  decline(req, res) {
+    const { id:invitationKey } = req.params;
+    const url = `${Constants.REMOTE_API_INVITATION}/${invitationKey}/decline`;
+    console.log('>>token<<', url, req.session.api.token);
+    return Promise.resolve()
+      .then(() => {
+        return fetch(url, null, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${req.session.api.token}`,
+          }
+        });
+      })
+      .then(invitation => {
+        res.send(invitation);
+      })
+      .catch(createFallback(res));
+  }
+
 }

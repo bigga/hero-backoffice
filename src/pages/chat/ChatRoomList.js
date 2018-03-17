@@ -40,7 +40,7 @@ export default class ChatRoomList extends React.Component {
 
   addChatRoom(key, meta) {
     const { chatRooms } = this.state;
-    const name = Object.values(meta.members || [])
+    const name = meta.name || Object.values(meta.members || [])
       .map(member => member.name)
       .join(', ');
     const chatRoom = { key, name, meta };
