@@ -63,12 +63,28 @@
   font-weight: normal;
 }
 
+.dataTable td.checkBox {
+  width: 20px;
+  text-align: center;
+}
+
 .dataTable td.nameCell {
   font-weight: bold;
 }
 
 .dataTable td.idCell {
   word-wrap: break-word;
+}
+
+.dataTable td.radioCell {
+  text-align: center;
+}
+
+.dataTable td.radioHeadCell {
+  font-weight: lighter;
+  font-style: italic;
+  text-align: center;
+  width: 50px;
 }
 
 .dataTable td.small {
