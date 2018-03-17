@@ -151,51 +151,57 @@ export default class UserPage extends React.Component {
     const userId = event.target.name;
     this.setState({
       isRequesting: {
-        ...this.state.isRequesting,
         [userId]: true,
       }
     }, () => {
-      const role = this.state.roles.filter(role => role.name === roleName).pop();
-      const user = { email: item.email, name: item.name, roleId: role.id };
-      const users = this.state.items;
-      apiFetch('PUT', `${Constants.API_USER}/${item.id}`, user)
-        .then(updatedUser => {
-          const index = users.findIndex(user => user.id === updatedUser.id);
-          if (index > -1) {
-            const newUsers = [...users];
-            newUsers.splice(index, 1, { ...updatedUser, role, registered: item.registered });
-            this.setState({
-              items: newUsers,
-              isRequesting: {
-                ...this.state.isRequesting,
-                [userId]: false,
-              }
-            });
-          }
-        })
-        .catch(error => {
-          const { message } = error;
-          if (message.indexOf('@JSON_') === 0) {
-            const data = JSON.parse(message.replace('@JSON_', ''));
-            const { message: boxError } = data;
-            this.setState({
-              boxError,
-              isRequesting: {
-                ...this.state.isRequesting,
-                [userId]: false,
-              }
-            });
-          }
-        });
+      this.updateNewRole(item, userId, roleName);
     })
   }
 
-  onAllItemSelected(event) {
-    const value = event.target.checked;
-    const isRequesting= Object.keys(this.state.isRequesting).reduce((obj, key) => ({ ...obj, [key]: value }), {});
-    this.setState({
-      isRequesting
-    });
+  updateNewRole(user, userId, roleName){
+    const role = this.state.roles.filter(role => role.name === roleName).pop();
+    const data = { email: user.email, name: user.name, roleId: role.id };
+    const myself = this;
+    apiFetch('PUT', `${Constants.API_USER}/${user.id}`, data)
+      .then(updatedUser => {
+        const users = myself.state.items;
+        const index = users.findIndex(user => user.id === updatedUser.id);
+        if (index > -1) {
+          const newUsers = [...users];
+          newUsers.splice(index, 1, { ...updatedUser, role, registered: user.registered });
+          this.setState({
+            items: newUsers,
+            isRequesting: {
+              [userId]: false,
+            }
+          });
+        }
+      })
+      .catch(error => {
+        const { message } = error;
+        if (message.indexOf('@JSON_') === 0) {
+          const data = JSON.parse(message.replace('@JSON_', ''));
+          const { message: boxError } = data;
+          this.setState({
+            boxError,
+            isRequesting: {
+              [userId]: false,
+            }
+          });
+        }
+      });
+  }
+
+  onBatchOptionSelected(event) {
+    const roleName = event.target.value;
+    console.log(roleName);
+    const validUsers = this.state.items.filter(user => user.role.name !== 'admin');
+    const isRequesting = validUsers.reduce((isRequesting, user) => ({ ...isRequesting, [user.id]: true }), {});
+
+    this.setState({ isRequesting }, () => {
+      console.log(this.state.isRequesting);
+      validUsers.forEach(user => this.updateNewRole(user, user.id, roleName));
+    })
   }
 
   onSave() {
@@ -429,7 +435,18 @@ export default class UserPage extends React.Component {
                 <td/>
                 <td/>
                 {['consultant', 'teacher', 'parent'].map(role =>
-                  (<td className={gs.radioHeadCell} key={role}>{TextUtils.capitalize(role)}</td>)
+                  (<td className={gs.radioHeadCell} key={role}>
+                    <input type="radio"
+                           name="batch_role"
+                           value={role}
+                           disabled={Object.values(this.state.isRequesting).some(loading => loading)}
+                           checked={this.state.items.filter(user => user.role.name !== 'admin')
+                             .map(user => user.role.name)
+                             .every(roleName => role === roleName)}
+                           onChange={event => this.onBatchOptionSelected(event)}
+                    />
+                    {TextUtils.capitalize(role)}
+                    </td>)
                 )}
                 <td/>
                 <td/>
