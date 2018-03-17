@@ -409,7 +409,7 @@ export default class UserPage extends React.Component {
               <tr>
                 <th>Email</th>
                 <th>Name</th>
-                <th colSpan="3">Role</th>
+                <th colSpan="4">Role</th>
                 <th>Registered</th>
                 <th>
                   <input type="file" style={{display: 'none'}}
@@ -434,7 +434,7 @@ export default class UserPage extends React.Component {
               <tr>
                 <td/>
                 <td/>
-                {['consultant', 'teacher', 'parent'].map(role =>
+                {['consultant', 'teacher', 'parent', 'none'].map(role =>
                   (<td className={gs.radioHeadCell} key={role}>
                     <input type="radio"
                            name="batch_role"
@@ -445,6 +445,7 @@ export default class UserPage extends React.Component {
                              .every(roleName => role === roleName)}
                            onChange={event => this.onBatchOptionSelected(event)}
                     />
+                    <br/>
                     {TextUtils.capitalize(role)}
                     </td>)
                 )}
@@ -459,7 +460,7 @@ export default class UserPage extends React.Component {
 
                   <td className={gs.idCell}>{item.email}</td>
                   <td className={gs.nameCell}>{item.name}</td>
-                  {['consultant', 'teacher', 'parent'].map(roleName =>
+                  {['consultant', 'teacher', 'parent', 'none'].map(roleName =>
                     (<td className={gs.radioCell}>
                       <input type="radio"
                              name={item.id}
