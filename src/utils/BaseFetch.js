@@ -3,7 +3,9 @@ import axios from 'axios';
 export default (method, url, body, options, contentType) => {
   const headers = {
     'Accept': 'application/json',
-    'Content-Type': contentType,
+    // 'Content-Type': contentType,
+    'Pragma': 'no-cache',
+    'Cache-control': 'no-cache'
   };
   
   return Promise.resolve()

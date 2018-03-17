@@ -37,7 +37,11 @@ export default class LoginPage extends React.Component {
         console.log(data);
         
         const { history } = this.props;
-        history.push('/user');
+        if (data.role.name === 'consultant') {
+          history.push('/chat');
+        } else {
+          history.push('/user');
+        }
       })
       .catch(error => {
         console.log(error);

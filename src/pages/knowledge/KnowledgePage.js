@@ -1,4 +1,5 @@
 import React from 'react';
+import {CSSTransitionGroup} from 'react-transition-group';
 import cx from 'classnames';
 
 import Constants from '../../config/Constants';
@@ -29,17 +30,14 @@ export default class KnowledgePage extends React.Component {
       validation: {...this.defaultValidation},
       currentItem: {...this.emptyValue},
       canMoveNext: false,
+      knowledgeType: 'file'
     };
   }
 
   componentWillMount() {
-    apiFetch('GET', Constants.API_ROLE)
-      .then(roles => {
-        this.setState({ roles })
-      });
     apiFetch('GET', `${Constants.API_KNOWLEDGE}`)
       .then(json => this.setState({
-        items: json.data,
+        items: json,
       }));
   }
 
@@ -102,11 +100,17 @@ export default class KnowledgePage extends React.Component {
     this.setState({ currentItem: item });
   }
 
+  onTypeChange(knowledgeType) {
+    this.setState({
+      knowledgeType
+    });
+  }
+
   onSave() {
     const { currentItem, validation } = this.state;
     validation.nameTH = !!(currentItem.nameTH || '').trim();
     validation.nameEN = !!(currentItem.nameEN || '').trim();
-    validation.file = currentItem.id ? true : !!currentItem.file;
+    //validation.file = currentItem.id ? true : !!currentItem.file;
     this.setState({ validation });
 
     console.log('>>validation<<', validation);
@@ -117,7 +121,12 @@ export default class KnowledgePage extends React.Component {
     const formData = new FormData();
     formData.append('nameTH', currentItem.nameTH);
     formData.append('nameEN', currentItem.nameEN);
-    formData.append('file', currentItem.file);
+    if (currentItem.file) {
+      formData.append('file', currentItem.file);
+    }
+    if (currentItem.url) {
+      formData.append('url', currentItem.url);
+    }
 
     if (currentItem.id) {
       const {currentItem} = this.state;
@@ -151,23 +160,9 @@ export default class KnowledgePage extends React.Component {
     }
   }
 
-  query() {
-    let { offset, limit, search } = this;
-    offset = offset || '';
-    limit = limit || '';
-    search = search || '';
-    return apiFetch('GET', `${Constants.API_USER}`
-      +`?offset=${offset}&limit=${limit}&q=${search}`)
-      .then(json => {
-        const items = json.data;
-        this.setState({ items, canMoveNext: !!json.next });
-        return Promise.resolve();
-      });
-  }
-
   itemName = 'Knowledge';
-  emptyValue = { id: '', nameEN: '', nameTH: '', file: '' };
-  defaultValidation = { nameEN: true, nameTH: true, file: true };
+  emptyValue = { id: '', nameEN: '', nameTH: '', file: null, url: '' };
+  defaultValidation = { nameEN: true, nameTH: true, file: true, url:true };
 
   renderConfirm() {
     return (
@@ -179,7 +174,7 @@ export default class KnowledgePage extends React.Component {
   }
 
   renderEdit() {
-    const { validation } = this.state;
+    const { validation, knowledgeType } = this.state;
     return (
       <EditBox
         onRef={ref => (this.adminEdit = ref)}
@@ -188,6 +183,15 @@ export default class KnowledgePage extends React.Component {
         <div className={gs.boxError}>
           { this.state.boxError }
         </div>
+        <label className={gs.formLabel} htmlFor="type">
+          Knowledge Type
+        </label>
+        <select type="text" id="type" className={gs.formInput}
+               onChange={event => this.onTypeChange(event.target.value) }
+        >
+          <option value="file">File</option>
+          <option value="url">URL</option>
+        </select>
         <label
           className={cx(gs.formLabel, !validation.nameTH && gs.error)}
           htmlFor="nameTH"
@@ -214,18 +218,51 @@ export default class KnowledgePage extends React.Component {
           placeholder="English name"
           onChange={event => this.onValueChange(event, 'nameEN')}
         />
-        <label
-          className={cx(gs.formLabel, !validation.file && gs.error)}
-          htmlFor="file"
-        >
-          Document file*
-        </label>
-        <input type="file"
-          id="file"
-          className={cx(gs.formInput, !validation.file && gs.errorInput)}
-          placeholder="File"
-          onChange={event => this.onFileChange(event, 'file')}
-        />
+        <CSSTransitionGroup transitionName="single-fade"
+                            transitionEnterTimeout={200}
+                            transitionLeaveTimeout={1}>
+        {
+          knowledgeType === 'file' ? (
+            <div>
+              <label
+                className={cx(gs.formLabel, !validation.file && gs.error)}
+                htmlFor="file"
+              >
+                Document file
+              </label>
+              <input type="file"
+                     id="file"
+                     className={cx(gs.formInput, !validation.file && gs.errorInput)}
+                     placeholder="File"
+                     onChange={event => this.onFileChange(event, 'file')}
+              />
+            </div>
+          ) : null
+        }
+        </CSSTransitionGroup>
+        <CSSTransitionGroup transitionName="single-fade"
+                            transitionEnterTimeout={200}
+                            transitionLeaveTimeout={1}>
+        {
+          knowledgeType === 'url' ? (
+            <div>
+              <label
+                className={cx(gs.formLabel, !validation.url && gs.error)}
+                htmlFor="url"
+              >
+                Document URL
+              </label>
+              <input type="text"
+                     id="url"
+                     className={cx(gs.formInput, !validation.url && gs.errorInput)}
+                     value={this.state.currentItem.url}
+                     placeholder="Document URL"
+                     onChange={event => this.onValueChange(event, 'url')}
+              />
+            </div>
+          ): null
+        }
+        </CSSTransitionGroup>
       </EditBox>
     );
   }
@@ -261,7 +298,7 @@ export default class KnowledgePage extends React.Component {
                   <td className={gs.nameCell}>{item.nameTH}</td>
                   <td className={gs.idCell}>{item.nameEN}</td>
                   <td className={cx(gs.idCell, gs.small)}>
-                    {`https://s3-ap-southeast-1.amazonaws.com/heroapp-knowledge/${item.url}`}
+                    {item.url}
                   </td>
                   <td className={gs.buttonCell}>
                     <button

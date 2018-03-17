@@ -57,6 +57,7 @@ middleware.setup(app);
 
 app.use('/static', express.static(path.resolve(__dirname, '..', 'build', 'static')));
 app.use('/fonts', express.static(path.resolve(__dirname, '..', 'build', 'fonts')));
+app.use('/css', express.static(path.resolve(__dirname, '..', 'build', 'css')));
 // app.use('/service-worker.js', express.static(path.resolve(__dirname, '..', 'build', 'service-worker.js')));
 // app.use('/manifest.json', express.static(path.resolve(__dirname, '..', 'build', 'manifest.json')));
 // app.use('/favicon.ico', express.static(path.resolve(__dirname, '..', 'build', 'favicon.ico')));

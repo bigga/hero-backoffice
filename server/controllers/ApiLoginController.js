@@ -25,11 +25,14 @@ export default class ApiLoginController {
         }
         
         const { user } = session;
-        if (!user || !user.role || user.role.name !== 'admin') {
+        console.log('>>role<<', user.role.name);
+        if (!user || !user.role ||
+          (user.role.name !== 'admin' && user.role.name !== 'manager' && user.role.name !== 'consultant')) {
           res.status(401).send({ message: 'UNAUTHENTICATED' });
           return Promise.reject(null);
         }
         req.session.api = session;
+        console.log('>>session<<', session);
         res.send(user);
       })
       .catch(createFallback(res));

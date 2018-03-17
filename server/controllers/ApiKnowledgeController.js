@@ -9,7 +9,6 @@ import ApiRoleController from "./ApiRoleController";
 export default class ApiKnowledgeController {
   list(req, res) {
     const url = `${Constants.REMOTE_API_KNOWLEDGE}`;
-    console.log(url);
     return Promise.resolve()
       .then(() => {
         return fetch(url, null, {
@@ -48,20 +47,24 @@ export default class ApiKnowledgeController {
 
   store(req, res) {
     const { file } = req;
-    const { nameEN, nameTH } = req.body || {};
+    const { nameEN, nameTH, url } = req.body || {};
     return Promise.resolve()
       .then(() => {
-        if (!file) {
-          return Promise.reject(new Error('FILE_NOT_UPLOADED'));
+        if (!file && !url) {
+          return Promise.reject(new Error('FILE_NOT_UPLOADED_OR_WRONG_URL'));
         }
         return Promise.resolve();
       })
       .then(() => {
-        console.log('>>params<<', nameEN, nameTH, file.path);
         const formData = new FormData();
         formData.append('name_en', nameEN);
         formData.append('name_th', nameTH);
-        formData.append('file', fs.createReadStream(file.path));
+        if (file) {
+          formData.append('file', fs.createReadStream(file.path));
+        }
+        if (url) {
+          formData.append('url', url);
+        }
 
         return fetch(Constants.REMOTE_API_KNOWLEDGE, formData, {
           method: 'POST',
@@ -80,13 +83,16 @@ export default class ApiKnowledgeController {
   update(req, res) {
     const { file } = req;
     const { id } = req.params;
-    const { nameEN, nameTH } = req.body || {};
+    const { url, nameEN, nameTH } = req.body || {};
 
     return Promise.resolve()
       .then(() => {
         const formData = new FormData();
         formData.append('name_en', nameEN);
         formData.append('name_th', nameTH);
+        if (url) {
+          formData.append('url', url);
+        }
         if (file) {
           formData.append('file', fs.createReadStream(file.path));
         }

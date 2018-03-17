@@ -1,0 +1,89 @@
+.container {
+    height: 100%;
+    display: flex;
+    margin-top: 0;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.messages {
+    flex: 1;
+    overflow: auto;
+}
+
+.messages ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.messages ul li {
+    margin-bottom: 10px;
+}
+
+.messages ul li .message {
+    display: inline-block;
+     padding: 10px 15px;
+     background: #eee;
+     border-radius: 20px;
+ }
+
+.messages ul li .date {
+    margin: 5px 10px 0;
+    font-size: 12px;
+    color: #888;
+}
+
+.messages ul li.mine {
+    text-align: right;
+}
+
+.messages ul li.mine {
+    align-self: flex-end;
+}
+
+.messages ul li.mine .message {
+    background: #fd9f5e;
+    color: #fff;
+}
+
+.messages ul li.mine .date {
+    text-align: right;
+}
+
+.messageInput {
+    display: flex;
+    min-height: 40px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.messageInput .text {
+    display: block;
+    padding: 0 20px;
+    flex: 1;
+    background: #f4f4f4;
+    border: 1px solid #999;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.messageInput .submit {
+    display: block;
+    width: 120px;
+    align-self: stretch;
+    font-size: 16px;
+    border: 0;
+    background: #999;
+    color: #fff;
+    border-radius: 0 20px 20px 0;
+    outline: none;
+}

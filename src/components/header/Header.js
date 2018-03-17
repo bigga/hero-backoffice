@@ -32,6 +32,10 @@ export default class Header extends React.Component {
   onPressKnowledge() {
     window.location.href = '/knowledge';
   }
+
+  onPressInvitation() {
+    window.location.href = '/invitation';
+  }
   
   renderMenu() {
     return (
@@ -67,6 +71,7 @@ export default class Header extends React.Component {
               <div className={s.dropdownContent}>
                 <a onClick={() => this.onPressUser()}>User</a>
                 <a onClick={() => this.onPressKnowledge()}>Knowledge</a>
+                <a onClick={() => this.onPressInvitation()}>Invitation</a>
                 <hr/>
                 <a onClick={() => this.onSignOut()}>Sign Out</a>
               </div>

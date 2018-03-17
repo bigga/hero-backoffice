@@ -318,7 +318,7 @@ export default class UserPage extends React.Component {
           onChange={event => this.onValueChange(event, 'roleId')}
         >
           <option value="">Please select</option>
-          {this.state.roles.map(role => (
+          {(this.state.roles || []).map(role => (
             <option value={role.id}>{TextUtils.capitalize(role.name)}</option>
           ))}
         </select>

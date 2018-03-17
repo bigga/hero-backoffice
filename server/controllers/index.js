@@ -6,10 +6,12 @@ import Constants from '../config/Constants';
 import LoginController from './ApiLoginController';
 import LogoutController from './ApiLogoutController';
 import SessionController from './ApiSessionController';
-import ApiUserController from "./ApiUserController";
+import ApiUserController from './ApiUserController';
 import ApiRoleController from './ApiRoleController';
 import ApiVersionController from './ApiVersionController';
-import ApiKnowledgeController from "./ApiKnowledgeController";
+import ApiKnowledgeController from './ApiKnowledgeController';
+import ApiChatController from './ApiChatController';
+import ApiInvitationController from "./ApiInvitationController";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -29,10 +31,13 @@ const fileUpload = multer({ storage:tempStorage });
 
 const login = new LoginController();
 const logout = new LogoutController();
+const session = new SessionController();
 const user = new ApiUserController();
 const role = new ApiRoleController();
 const knowledge = new ApiKnowledgeController();
 const version = new ApiVersionController();
+const chat = new ApiChatController();
+const invitation = new ApiInvitationController();
 
 export default {
   setup(app) {
@@ -64,8 +69,14 @@ export default {
       .delete(`${Constants.LOCAL_API_KNOWLEDGE}/:id`, knowledge.destroy)
       // Role
       .get(Constants.LOCAL_API_ROLE, role.list)
+      // Chat
+      .post(Constants.LOCAL_API_SEND_MESSAGE, chat.sendMessage)
       // Version
-      .get(Constants.LOCAL_API_VERSION, version.list);
+      .get(Constants.LOCAL_API_VERSION, version.list)
+      // Session
+      .get(Constants.LOCAL_API_SESSION, session.get)
+      // Invitation
+      .get(Constants.LOCAL_API_INVITATION, invitation.get);
   }
   
 };
