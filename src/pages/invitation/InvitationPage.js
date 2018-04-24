@@ -65,7 +65,7 @@ export default class InvitationPage extends React.Component {
                 <th>Student's name</th>
                 <th>Requested at</th>
                 <th>Status</th>
-                <th colSpan={2}/>
+                <th/>
               </tr>
               </thead>
               <tbody>
@@ -94,16 +94,6 @@ export default class InvitationPage extends React.Component {
                             onClick={() => this.onAccept(invitation)}
                           >
                             Accept
-                          </button>
-                        </td>
-                      ) : null}
-                      { invitation.status === 'Pending' ? (
-                        <td>
-                          <button
-                            className={cx(gs.shadowButton, gs.danger)}
-                            onClick={() => this.onDecline(invitation)}
-                          >
-                            Decline
                           </button>
                         </td>
                       ) : null}
